@@ -1,2 +1,129 @@
-# StadiumPulse
-Smart Stadiums &amp; Tournament Operations ai based application
+# Fanflow
+
+Fanflow is a GenAI-enabled stadium operations coordination and real-time fan routing platform designed for the FIFA World Cup 2026.
+
+## Challenge Alignment
+
+Fanflow addresses the challenges of large-scale event navigation, transit coordination, accessibility, and multilingual assistance through a unified database model and Gemini context-aware prompting. By matching real-time simulated telemetry (zone crowd densities) and active incident reports against fan queries, the system dynamically reroutes fans to lower-density gates, suggests wheelchair-accessible routes (ADA-compliant paths), and recommends zero-emission transit networks (Metro and Electric Bus routes). For volunteers and venue staff, raw reports are automatically triaged by Gemini for priority ranking and category summaries, generating a real-time operational intelligence feed for on-ground decision support. All fan interfaces are zero-config, auto-translating output back to the fan's native tongue.
+
+---
+
+## Data Flow Architecture
+
+```
+                                +---------------------------------------------+
+                                |               MongoDB Atlas                 |
+                                |  (Collections: venueMap, crowdZones,        |
+                                |   incidents, chatSessions)                  |
+                                +----------------------+----------------------+
+                                                       |
+                                                       | (Real-time read/write)
+                                                       v
++-------------------+      POST /api/chat     +-------------------------------+
+|     Fan View      |------------------------>|       Express Server          |
+|  - Chat Concierge |                         |  - Security Headers (Helmet)  |
+|  - SVG Stand Map  |<------------------------|  - Payload Size Validators    |
++-------------------+      JSON Response      |  - Rate Limiters (express-rl) |
+                                              +---------------+---------------+
+                                                              |
+                                                              | Injects context
+                                                              v
++-------------------+    POST /api/incidents  +-------------------------------+
+|     Ops View      |------------------------>|     Gemini Prompt Engine      |
+|  - Metric Gauges  |                         |  - Real-time densities        |
+|  - Incident Form  |<------------------------|  - Active incident context    |
+|  - Alert Stream   |      JSON Response      |  - Zero-config translation    |
++-------------------+                         +-------------------------------+
+```
+
+---
+
+## Feature Breakdown by Target Persona
+
+### Fan Features
+- **Fan Concierge Chat**: A GenAI conversational assistant answering navigation, entry/exit, and transit queries. It auto-detects Spanish, French, and English, returning answers in the user's native tongue.
+- **Interactive SVG Map**: Vector-based blueprint highlighting gates, zones, or transit hubs when referenced in the concierge's AI response. Zones dynamically change colors (emerald, amber, rose) based on live density telemetry.
+- **Accessibility Integration**: Accessibility (ADA) Mode alters visual themes (larger text, high-contrast colors) and forces the routing engine to bypass stairs and turnstiles, directing users exclusively to ramps and elevators (Gate 1 and Gate 3).
+
+### Ops / Organizer / Volunteer Features
+- **Crowd Management Dashboard**: Evaluates overall stadium occupancy, attendance, and triggers blinking visual alerts for high-density stands (>80% capacity).
+- **Sustainability Tracker Widget**: Computes dynamic carbon footprint savings in kilograms of CO2 and tracks public transit utilization metrics.
+- **Real-Time Incident Reporting**: Form for volunteers and staff to log issues. The description is processed by Gemini to automatically assign priority (LOW, MEDIUM, HIGH), categorize the issue, and create a one-sentence summary.
+- **Operational Intelligence Feed**: Stream of active incidents sorted by priority. HIGH priority tickets trigger automatic density spikes in the DB, feeding back into the Fan Concierge's routing prompts.
+- **Simulation Control Panel**: Interface to manually adjust zone density by +/-15% to test and verify real-time AI rerouting dynamics.
+
+---
+
+## Technical Stack Reference
+
+| Toolchain | Component | Engineering Justification |
+| :--- | :--- | :--- |
+| **React 19 + Vite** | Client Framework | Enables fast, single-page application scaffolding, TypeScript compilation, and standard modular component management. |
+| **Tailwind CSS v4** | Client Styling | Native Vite integration via CSS imports, removing Tailwind build steps and enforcing high-contrast, scalable visual states. |
+| **Framer Motion** | Client Animations | Implements UI transitions. Respects user hardware preferences by referencing `prefers-reduced-motion` configurations. |
+| **DOMPurify + ReactMarkdown** | Client Security | Blocks Cross-Site Scripting (XSS) by sanitizing raw model text before parsing markdown nodes. |
+| **Node.js + Express** | Backend Server | Asynchronous request processing framework ideal for handling REST endpoints and database routing. |
+| **Gemini API (1.5 Flash)** | AI Orchestration | Handles text intent classification, context-aware prompt routing, language translation, and automated incident triage. |
+| **MongoDB Atlas** | Data Persistence | Document database to manage static layouts, simulated crowd zones, active incidents, and conversation logs. |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- **Node.js**: `v20.x` or higher
+- **npm**: `v10.x` or higher
+- Optional: MongoDB Atlas Cluster URI and Gemini API Key. (If omitted, Fanflow runs on local mock fallbacks).
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd Fanflow
+   ```
+2. Install all monorepo dependencies:
+   ```bash
+   npm run install:all
+   ```
+3. Configure environment variables. Create a `.env` file in the root directory:
+   ```bash
+   cp .env.example .env
+   ```
+4. Edit `.env` to supply credentials if using live services:
+   ```env
+   PORT=5000
+   GEMINI_API_KEY=your_gemini_api_key_here
+   MONGODB_URI=your_mongodb_srv_uri_here
+   ```
+
+### Execution
+Run both backend API server and Vite client concurrently:
+```bash
+npm run dev
+```
+- Backend will run at: `http://localhost:5000`
+- Frontend will run at: `http://localhost:5173`
+
+---
+
+## Security Boundary & Simulation Boundaries
+
+### Active Hardening Mitigations
+- **Helmet Headers**: Secure HTTP headers applied globally.
+- **CORS Boundaries**: Configured to whitelist designated development ports (`localhost:5173`, `localhost:5000`) and rejects wildcard origins in production environments.
+- **Rate Limiters**: Standard global limitations with strict throttling dialed down on Gemini API routes to prevent API quota drain.
+- **Oversized String Sanitization**: Requests containing payloads over 2000 characters for chat or 1000 characters for incidents are rejected before parsing to prevent buffer inflation.
+- **Zero Log Leaks**: Logs are output in structured JSON. User input messages, names, and environment keys are never printed to stdout.
+
+### Simulation vs. Production Scope
+- **Crowd Telemetry**: Zone densities are powered by an in-memory background interval runner that applies simulated capacity jitter every 5 seconds, rather than connecting to live IoT camera feeds.
+- **Database Fallback**: In the absence of a configured MongoDB cluster, the application automatically stands up an in-memory database instance to allow local testing.
+- **AI Fallback**: If a Gemini API key is missing, the backend runs a deterministic pattern-matching engine that behaves identically to standard intent routing and incident categorizations.
+- **Authentication**: Demonstrates role separation (Fan vs. Ops) using a simple client-side toggle to facilitate quick evaluation without OAuth databases.
+
+---
+
+## Known Limitations & Roadmap
+- **Session Tracking**: Chat sessions rely on a single demo session ID. Production builds will require stateless JWT validation.
+- **SVG Multi-Level Map**: SVG is currently a 2D macro projection. Adding layer toggles for multi-tier seating structures is planned.
+- **Live WebSocket Feeds**: Telemetry currently uses 5-second polling. Upgrading to socket-based streams will reduce round-trip load.

@@ -1,0 +1,88 @@
+import express from 'express';
+import dotenv from 'dotenv';
+import path from 'path';
+import { connectDB } from './db';
+import {
+  configuredCors,
+  configuredHelmet,
+  globalRateLimiter,
+  geminiApiRateLimiter,
+  requestIdMiddleware,
+  validateChatPayload,
+  validateIncidentPayload,
+  logJSON
+} from './middleware';
+import apiRouter from './routes';
+
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Fallback if not loaded in root
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Security and utility middleware
+app.use(configuredHelmet);
+app.use(configuredCors);
+app.use(express.json({ limit: '10kb' })); // Limit body sizes to prevent payload inflation
+app.use(requestIdMiddleware);
+
+// Apply Global Rate Limiting
+app.use(globalRateLimiter);
+
+// Specific Rate Limiting and Payload Validation on Gemini endpoints
+app.use('/api/chat', geminiApiRateLimiter, validateChatPayload);
+app.post('/api/incidents', geminiApiRateLimiter, validateIncidentPayload);
+
+// Attach Router
+app.use('/api', apiRouter);
+
+// Basic health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'Fanflow API', timestamp: new Date().toISOString() });
+});
+
+// Global error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const requestId = (req.headers['x-request-id'] as string) || 'unknown';
+  logJSON('ERROR', {
+    requestId,
+    method: req.method,
+    url: req.originalUrl,
+    message: 'Unhandled application error occurred.',
+    error: err.message || String(err)
+  });
+
+  return res.status(err.status || 500).json({
+    error: 'An internal error occurred. Please contact the administrator.'
+  });
+});
+
+// Bootstrapping the server
+async function bootstrap() {
+  try {
+    // Connect DB & Seed
+    await connectDB();
+
+    app.listen(PORT, () => {
+      logJSON('INFO', {
+        requestId: 'BOOT',
+        method: 'SERVER',
+        url: 'listen',
+        message: `Fanflow Backend running on port ${PORT}`
+      });
+    });
+  } catch (err: any) {
+    logJSON('ERROR', {
+      requestId: 'BOOT',
+      method: 'SERVER',
+      url: 'listen',
+      message: 'Failed to bootstrap backend service.',
+      error: err.message
+    });
+    process.exit(1);
+  }
+}
+
+bootstrap();
