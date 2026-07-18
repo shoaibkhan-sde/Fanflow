@@ -1,6 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+
+// Load environment variables FIRST before importing other local modules
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Fallback if not loaded in root
+dotenv.config();
+
 import { connectDB } from './db';
 import {
   configuredCors,
@@ -13,11 +19,6 @@ import {
   logJSON
 } from './middleware';
 import apiRouter from './routes';
-
-// Load environment variables
-dotenv.config({ path: path.join(__dirname, '../../.env') });
-// Fallback if not loaded in root
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

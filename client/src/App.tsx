@@ -158,7 +158,7 @@ function App() {
             {activePersona === 'fan' ? (
               <>
                 {/* Left side: Interactive Map */}
-                <div className="lg:col-span-7 space-y-4">
+                <div className="lg:col-span-12 space-y-4">
                   <StadiumMap
                     zones={zones}
                     gates={gates}
@@ -181,126 +181,7 @@ function App() {
                   />
                 </div>
 
-                {/* Right side: Walkthrough Guide */}
-                <div className="lg:col-span-5 space-y-4">
-                  {/* Interactive Demo Guide */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3.5">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-teal-400">
-                        Interactive Walkthrough Guide
-                      </h4>
-                      <span className="text-[10px] bg-slate-950 px-2 py-0.5 rounded text-slate-400 font-bold">
-                        Step {demoStep} of 4
-                      </span>
-                    </div>
 
-                    {demoStep === 1 && (
-                      <div className="space-y-3">
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          <strong>Step 1: Check Standard Entry Routing</strong><br />
-                          Query the AI concierge to find the fastest entrance gate under normal, clear conditions.
-                        </p>
-                        <button
-                          onClick={() => {
-                            setExternalQuery("Where is the best gate to enter right now to avoid crowds?");
-                            setActivePersona('fan');
-                            setDemoStep(2);
-                            showToast("Querying AI Concierge about entry...", "info");
-                          }}
-                          className="text-xs bg-teal-500 text-slate-950 font-bold px-3 py-2 rounded-lg hover:bg-teal-400 transition-all w-full text-center cursor-pointer"
-                        >
-                          Run Entry Query
-                        </button>
-                      </div>
-                    )}
-
-                    {demoStep === 2 && (
-                      <div className="space-y-3">
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          <strong>Step 2: Simulate Outage Bottleneck</strong><br />
-                          Report a scanner failure at Gate 4 (West Stand) which immediately triggers high-capacity congestions in the database.
-                        </p>
-                        <button
-                          onClick={async () => {
-                            setIsLoading(true);
-                            try {
-                              const res = await fetch('/api/incidents', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                  description: "Scanner breakdown at Gate 4. Volunteers reporting ticket validation failures.",
-                                  reportedBy: "staff",
-                                  zoneId: "Zone-D"
-                                })
-                              });
-                              if (res.ok) {
-                                await fetchLiveTelemetry();
-                                setDemoStep(3);
-                                showToast("Simulated scanner incident at Gate 4!", "success");
-                              }
-                            } catch (e) {
-                              console.error(e);
-                            } finally {
-                              setIsLoading(false);
-                            }
-                          }}
-                          className="text-xs bg-amber-500 text-slate-950 font-bold px-3 py-2 rounded-lg hover:bg-amber-400 transition-all w-full text-center cursor-pointer"
-                        >
-                          Simulate Outage Incident
-                        </button>
-                      </div>
-                    )}
-
-                    {demoStep === 3 && (
-                      <div className="space-y-3">
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          <strong>Step 3: Observe Real-Time AI Rerouting</strong><br />
-                          Query the AI Concierge again. The system automatically detours you away from the congested Gate 4 towards Gate 1.
-                        </p>
-                        <button
-                          onClick={() => {
-                            setExternalQuery("Where is the best gate to enter right now to avoid crowds?");
-                            setActivePersona('fan');
-                            setDemoStep(4);
-                            showToast("Querying AI Concierge about detour...", "info");
-                          }}
-                          className="text-xs bg-teal-500 text-slate-950 font-bold px-3 py-2 rounded-lg hover:bg-teal-400 transition-all w-full text-center cursor-pointer"
-                        >
-                          Verify AI Rerouting
-                        </button>
-                      </div>
-                    )}
-
-                    {demoStep === 4 && (
-                      <div className="space-y-3">
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          <strong>Step 4: Demo Completed!</strong><br />
-                          You have verified the crowd-aware feedback loop. Reset the simulation to clear the incidents and try again.
-                        </p>
-                        <button
-                          onClick={async () => {
-                            setIsLoading(true);
-                            try {
-                              // Reset Zone-D density back to normal
-                              await handleAdjustDensity("Zone-D", -25);
-                              await fetchLiveTelemetry();
-                              setDemoStep(1);
-                              setMapHighlights([]);
-                              showToast("Simulation reset successfully.", "success");
-                            } catch (e) {
-                              console.error(e);
-                            } finally {
-                              setIsLoading(false);
-                            }
-                          }}
-                          className="text-xs bg-slate-800 text-slate-100 font-bold px-3 py-2 rounded-lg hover:bg-slate-750 transition-all border border-slate-700 w-full text-center cursor-pointer"
-                        >
-                          Reset Simulation
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </>
             ) : (
               <>

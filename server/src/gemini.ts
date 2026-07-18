@@ -1,7 +1,7 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { logJSON } from './middleware';
 import { getVenueLayout, getCrowdDensities, getIncidents, CrowdZone, VenueGate, TransitHub, Incident } from './db';
-
+import { StadiumGraph, DensityMap } from './graph';
 // Initialize the Gemini API client if key is present
 const apiKey = process.env.GEMINI_API_KEY;
 let genAI: GoogleGenerativeAI | null = null;
@@ -46,7 +46,26 @@ export async function processChat(
   try {
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
-      generationConfig: { responseMimeType: 'application/json' }
+      tools: [{
+        functionDeclarations: [{
+          name: "getOptimalRoute",
+          description: "Get the optimal route and current crowd status between two locations in the stadium. MUST be called whenever a fan asks for navigation, directions, or crowd status.",
+          parameters: {
+            type: SchemaType.OBJECT,
+            properties: {
+              current_location: {
+                type: SchemaType.STRING,
+                description: "The fan's current location (e.g. Exterior, Gate-1, Zone-A, Hub-1)"
+              },
+              destination: {
+                type: SchemaType.STRING,
+                description: "The fan's desired destination (e.g. Interior_Target, Zone-C, Gate-3)"
+              }
+            },
+            required: ["current_location", "destination"]
+          }
+        }]
+      }]
     });
 
     const systemPrompt = `You are the Fanflow AI Concierge, a real-time, context-aware digital assistant for the FIFA World Cup 2026.
@@ -55,33 +74,86 @@ Your job is to provide navigation, accessibility, and transit assistance to fans
 CURRENT VENUE LAYOUT CONTEXT:
 ${JSON.stringify(venue)}
 
-REAL-TIME CROWD DENSITIES:
-${JSON.stringify(densities)}
-
-ACTIVE INCIDENTS REPORTED BY STAFF/VOLUNTEERS:
-${JSON.stringify(incidents)}
-
 ACCESSIBILITY MODE ACTIVE: ${accessibilityMode}
 
-INSTRUCTIONS:
+CRITICAL INSTRUCTIONS:
 1. Auto-detect the language of the user query and respond in the SAME language.
-2. If accessibilityMode is true OR if the user mentions accessibility constraints (wheelchair, walking issues, ramps, elevators), prioritize routing them through ADA-compliant gates (Gate-1, Gate-3) and highlight accessibility paths.
-3. Crowd-Aware Routing: Look at the REAL-TIME CROWD DENSITIES. Reroute fans away from HIGH density zones or gates (e.g. density > 80%) or zones with active incident blockages (e.g. scanner failures, security). Direct them to gates connected to LOW or MEDIUM density zones.
+2. If the user asks for a route, directions, or crowd status, you MUST invoke the getOptimalRoute tool. Do NOT attempt to answer from your training data or hallucinate a route.
+3. If accessibilityMode is true OR if the user mentions accessibility constraints (wheelchair, walking issues, ramps, elevators), pass this context to the tool by ensuring the destination is an ADA-compliant location if applicable, or inform the user based on the tool's output.
 4. Zero-Emission Transit Guidance: If they ask about transit, rideshares, or leaving, advise them to take public transit like Metro (Hub-1) or Bus (Hub-2) which are zero-emission, unless there is a capacity bottleneck or incident there.
-5. Return a JSON object matching this schema:
+5. Your final response to the user MUST be a JSON object matching this schema:
 {
   "text": "Your helpful response string. Use Markdown. Speak in their detected language.",
-  "highlights": ["Gate-3", "Zone-C"], // List of Gate IDs (Gate-1, Gate-2, Gate-3, Gate-4), Zone IDs (Zone-A, Zone-B, Zone-C, Zone-D), or Transit Hub IDs (Hub-1, Hub-2, Hub-3) referenced in your guidance.
+  "highlights": ["Gate-3", "Zone-C"],
   "detectedLanguage": "ISO-2 language code (e.g. en, es, fr)"
 }
 Return ONLY the raw JSON object, no wrapping markdown blocks (e.g. no \`\`\`json).`;
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nUser Input: "${message}"` }] }]
+    const chat = model.startChat({
+      systemInstruction: systemPrompt
     });
 
-    const responseText = result.response.text();
-    const data = JSON.parse(responseText.trim()) as ChatAIResponse;
+    let result = await chat.sendMessage(`User Input: "${message}"`);
+    let response = result.response;
+    
+    const functionCalls = response.functionCalls();
+    if (functionCalls && functionCalls.length > 0) {
+      const call = functionCalls[0];
+      if (call.name === "getOptimalRoute") {
+        
+        // Execute our Graph Engine
+        const graph = new StadiumGraph();
+        const densityMap: DensityMap = {};
+        densities.forEach(d => densityMap[d.zoneId] = d.density);
+        incidents.forEach(inc => {
+          if (inc.priority === 'HIGH') densityMap[inc.zoneId] = 150; 
+        });
+
+        graph.addEdge('Exterior', 'Gate-1', 10);
+        graph.addEdge('Exterior', 'Gate-2', accessibilityMode ? Infinity : 10);
+        graph.addEdge('Exterior', 'Gate-3', 10);
+        graph.addEdge('Exterior', 'Gate-4', accessibilityMode ? Infinity : 10);
+        graph.addEdge('Gate-1', 'Zone-A', 5);
+        graph.addEdge('Gate-2', 'Zone-B', 5);
+        graph.addEdge('Gate-3', 'Zone-C', 5);
+        graph.addEdge('Gate-4', 'Zone-D', 5);
+        graph.addEdge('Zone-A', 'Interior_Target', 1);
+        graph.addEdge('Zone-B', 'Interior_Target', 1);
+        graph.addEdge('Zone-C', 'Interior_Target', 1);
+        graph.addEdge('Zone-D', 'Interior_Target', 1);
+
+        const { path, cost } = graph.findShortestPath('Exterior', 'Interior_Target', densityMap);
+        
+        let recommendedGate = 'Gate-1';
+        let targetZone = 'Zone-A';
+        if (path.length >= 3) {
+          recommendedGate = path[1];
+          targetZone = path[2];
+        }
+
+        const toolResponse = {
+          optimal_path: path,
+          cost: cost,
+          recommended_gate: recommendedGate,
+          target_zone: targetZone,
+          active_incidents: incidents.filter(i => i.zoneId === targetZone),
+          target_zone_density: densityMap[targetZone] || 0
+        };
+
+        // Send function result back to the model
+        result = await chat.sendMessage([{
+          functionResponse: {
+            name: 'getOptimalRoute',
+            response: toolResponse
+          }
+        }]);
+        response = result.response;
+      }
+    }
+
+    const responseText = response.text();
+    const cleanText = responseText.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+    const data = JSON.parse(cleanText) as ChatAIResponse;
     return data;
   } catch (err: any) {
     logJSON('ERROR', { requestId, method: 'GEMINI', url: 'chat', message: 'Gemini chat processing failed. Falling back to mock engine.', error: err.message });
@@ -182,63 +254,60 @@ function generateMockChat(
   // 2. Check for Accessibility Intent
   const hasAccessIntent = accessibilityMode || text.includes('wheelchair') || text.includes('silla') || text.includes('rampa') || text.includes('ramp') || text.includes('elevator') || text.includes('ascensor') || text.includes('disabled') || text.includes('incapacitado') || text.includes('handicap');
   
-  // 3. Crowd-Aware Routing logic
-  // Find the lowest density zones
+  // 3. Crowd-Aware Routing logic with Graph Engine
   const sortedZones = [...densities].sort((a, b) => a.density - b.density);
-  const bestZone = sortedZones[0]; // Zone with lowest crowd density
   const worstZone = sortedZones[sortedZones.length - 1]; // Zone with highest crowd density
 
-  // Select recommended gates
-  let recommendedGate = 'Gate-1'; // Default
-  let fallbackGate = 'Gate-3';
+  // Initialize Graph
+  const graph = new StadiumGraph();
+  const densityMap: DensityMap = {};
+  densities.forEach(d => densityMap[d.zoneId] = d.density);
 
-  // Check if there is an active incident at Gate-1 or Zone-A
-  const zoneAIncident = incidents.some(i => i.zoneId === 'Zone-A');
-  const zoneBIncident = incidents.some(i => i.zoneId === 'Zone-B');
-  const zoneCIncident = incidents.some(i => i.zoneId === 'Zone-C');
-  const zoneDIncident = incidents.some(i => i.zoneId === 'Zone-D');
+  // Apply incident penalties heavily to density map so graph avoids them
+  incidents.forEach(inc => {
+    if (inc.priority === 'HIGH') densityMap[inc.zoneId] = 150; 
+  });
 
-  // Route to the lowest density zone gate
-  if (bestZone.zoneId === 'Zone-A' && !zoneAIncident) {
-    recommendedGate = 'Gate-1';
-  } else if (bestZone.zoneId === 'Zone-B' && !zoneBIncident) {
-    recommendedGate = 'Gate-2';
-  } else if (bestZone.zoneId === 'Zone-C' && !zoneCIncident) {
-    recommendedGate = 'Gate-3';
-  } else if (bestZone.zoneId === 'Zone-D' && !zoneDIncident) {
-    recommendedGate = 'Gate-4';
-  } else {
-    // If best zone has incidents, pick the second best
-    const secondBest = sortedZones[1];
-    if (secondBest.zoneId === 'Zone-A') recommendedGate = 'Gate-1';
-    else if (secondBest.zoneId === 'Zone-B') recommendedGate = 'Gate-2';
-    else if (secondBest.zoneId === 'Zone-C') recommendedGate = 'Gate-3';
-    else recommendedGate = 'Gate-4';
+  // Build routing edges (Exterior -> Gates -> Zones -> Interior)
+  // If ADA is required, non-ADA gates (Gate-2, Gate-4) get infinite penalty
+  graph.addEdge('Exterior', 'Gate-1', 10);
+  graph.addEdge('Exterior', 'Gate-2', hasAccessIntent ? Infinity : 10);
+  graph.addEdge('Exterior', 'Gate-3', 10);
+  graph.addEdge('Exterior', 'Gate-4', hasAccessIntent ? Infinity : 10);
+
+  graph.addEdge('Gate-1', 'Zone-A', 5);
+  graph.addEdge('Gate-2', 'Zone-B', 5);
+  graph.addEdge('Gate-3', 'Zone-C', 5);
+  graph.addEdge('Gate-4', 'Zone-D', 5);
+
+  graph.addEdge('Zone-A', 'Interior_Target', 1);
+  graph.addEdge('Zone-B', 'Interior_Target', 1);
+  graph.addEdge('Zone-C', 'Interior_Target', 1);
+  graph.addEdge('Zone-D', 'Interior_Target', 1);
+
+  const { path } = graph.findShortestPath('Exterior', 'Interior_Target', densityMap);
+  
+  let recommendedGate = 'Gate-1';
+  let bestZone = sortedZones[0];
+
+  if (path.length >= 3) {
+    recommendedGate = path[1]; // E.g., Gate-3
+    const targetZoneId = path[2]; // E.g., Zone-C
+    bestZone = densities.find(d => d.zoneId === targetZoneId) || sortedZones[0];
   }
 
-  // If accessibility is flagged, override to ensure an ADA-compliant gate (Gate-1 or Gate-3)
   const highlights: string[] = [];
-  let responseText = `${greeting}\n\n`;
+  let responseText = '';
 
   if (hasAccessIntent) {
-    // Re-route to Gate-3 (South) or Gate-1 (North) based on lower density
-    const zoneADensity = densities.find(d => d.zoneId === 'Zone-A')?.density || 50;
-    const zoneCDensity = densities.find(d => d.zoneId === 'Zone-C')?.density || 50;
-    
-    if (zoneCDensity <= zoneADensity && !zoneCIncident) {
-      recommendedGate = 'Gate-3';
-      highlights.push('Gate-3', 'Zone-C');
-    } else {
-      recommendedGate = 'Gate-1';
-      highlights.push('Gate-1', 'Zone-A');
-    }
+    highlights.push(recommendedGate, bestZone.zoneId);
 
     if (lang === 'es') {
-      responseText += `♿ **Modo de Accesibilidad Activado**: Recomendamos ingresar por la **Puerta 3 (Sur)** o **Puerta 1 (Norte)**. Ambas cuentan con rampas de acceso especiales y personal de asistencia. La **Puerta 3** tiene una densidad de personas de sólo el ${zoneCDensity}%.`;
+      responseText += `♿ **Modo de Accesibilidad Activado**: Recomendamos ingresar por la **Puerta ${recommendedGate.split('-')[1]}**. Cuenta con rampas de acceso especiales y personal de asistencia. La zona conectada tiene una densidad de personas de sólo el ${bestZone.density}%.`;
     } else if (lang === 'fr') {
-      responseText += `♿ **Mode Accessibilité Activé**: Nous vous recommandons d'entrer par la **Porte 3 (Sud)** ou la **Porte 1 (Nord)**. Elles disposent de rampes d'accès adaptées. La **Porte 3** affiche une affluence de seulement ${zoneCDensity}%.`;
+      responseText += `♿ **Mode Accessibilité Activé**: Nous vous recommandons d'entrer par la **Porte ${recommendedGate.split('-')[1]}**. Elle dispose de rampes d'accès adaptées. La zone connectée affiche une affluence de seulement ${bestZone.density}%.`;
     } else {
-      responseText += `♿ **Accessibility Assistance Mode Active**: We recommend entering through **Gate 3 (South)** or **Gate 1 (North)**. These gates feature low-grade ramps, elevator access, and dedicated volunteers. Currently, **Gate 3** has a low crowd density of ${zoneCDensity}%.`;
+      responseText += `♿ **Accessibility Assistance Mode Active**: We recommend entering through **Gate ${recommendedGate.split('-')[1]}**. This gate features low-grade ramps, elevator access, and dedicated volunteers. The connected area currently has a low crowd density of ${bestZone.density}%.`;
     }
   } else {
     // Standard crowd-aware routing
