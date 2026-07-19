@@ -107,17 +107,22 @@ export function validateIncidentPayload(req: Request, res: Response, next: NextF
 // CORS settings
 export const configuredCors = cors({
   origin: (origin, callback) => {
-    // Explicitly scope to local dev or production domain
-    // Reject * in production environments if configured
+    // Allow localhost for development
     const allowedOrigins = [
-      'http://localhost:5173', // Vite default dev port
-      'http://localhost:5000', // Server hosting locally
+      'http://localhost:5173',
+      'http://localhost:5000',
+      'https://fanflow-azure.vercel.app',
     ];
+
+    // Also allow any Vercel preview deployment URLs for this project
+    const isVercelPreview = origin && /^https:\/\/fanflow.*\.vercel\.app$/.test(origin);
+
+    // Allow custom origin from env variable
     if (process.env.CLIENT_ORIGIN_URL) {
       allowedOrigins.push(process.env.CLIENT_ORIGIN_URL);
     }
 
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || isVercelPreview) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS policy in production settings.'));
