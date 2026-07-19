@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Activity, MessageSquare, Map as MapIcon, Accessibility, User, MapPin, Compass, Shield, MoreVertical, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useMatch, TEAM_CONFIG } from '../context/MatchContext';
+import fifaLogo from '../../public/fifa-logo.png';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
@@ -37,7 +38,7 @@ export const Layout: React.FC = () => {
           {/* LEFT SIDE: BRANDING */}
           <NavLink to="/" className="flex items-center gap-4 group">
             <div className="flex items-center gap-3">
-              <img src="/fifa-logo.png" alt="FIFA 26 Logo" className="h-10 w-auto object-contain transition-transform group-hover:scale-105 mix-blend-screen" />
+              <img src={fifaLogo} alt="FIFA 26 Logo" className="h-10 w-auto object-contain transition-transform group-hover:scale-105 mix-blend-screen" />
               <div>
                 <h1 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
                   Fanflow
