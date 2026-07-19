@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Compass, Activity, Shield, Accessibility, ChevronDown, MoreVertical } from 'lucide-react';
+import fifaLogo from '../../public/fifa-logo.png';
 
 interface NavBarProps {
   venueName: string;
@@ -27,7 +28,7 @@ export const NavBar: React.FC<NavBarProps> = ({
         {/* LEFT SIDE: BRANDING */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <img src="/fifa-logo.png" alt="FIFA 26 Logo" className="h-10 w-auto object-contain" />
+            <img src={fifaLogo} alt="FIFA 26 Logo" className="h-10 w-auto object-contain" />
             <div>
               <h1 className="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
                 Fanflow
