@@ -19,12 +19,16 @@
       "dest": "/server/src/index.ts"
     },
     {
-      "src": "/(.*\\.[a-zA-Z0-9]+)$",
-      "dest": "/$1"
+      "src": "/(assets/.*)",
+      "dest": "/client/$1"
+    },
+    {
+      "src": "/(vite\\.svg|favicon\\.ico|manifest\\.json)",
+      "dest": "/client/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/client/index.html"
     }
   ]
 }
