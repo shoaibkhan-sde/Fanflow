@@ -84,7 +84,7 @@ export const VisualizerPage: React.FC = () => {
 
     stands.forEach(id => {
       const realZone = zones.find(z => z.name.toLowerCase().includes(id));
-      const defaults: any = {
+      const defaults: Record<string, string | number> = {
         north: { density: 86 },
         east: { density: 70 },
         south: { density: 55 },
@@ -108,7 +108,7 @@ export const VisualizerPage: React.FC = () => {
     const alertLevel = alertOverrides[id] || 'Low';
     
     // Default mock data matching the HTML mockup if API data isn't loaded yet
-    const defaults: any = {
+    const defaults: Record<string, string | number> = {
       north: { name: "North Stand", density: 86, desc: "Heavy queue formation observed at North turning lanes. Wait times adjusting upwards." },
       east: { name: "East Stand", density: 70, desc: "Main gates flowing steadily. Structural entry pathways running normal." },
       south: { name: "South Stand", density: 55, desc: "Wait time at gates is estimated at 4 mins. System parameters are running and safe for immediate access." },

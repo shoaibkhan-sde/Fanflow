@@ -26,7 +26,7 @@ router.post('/register', async (req: Request, res: Response) => {
     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 7 * 24 * 60 * 60 * 1000 });
     
     return res.json({ id: newUser.id, email: newUser.email, fullName: newUser.fullName });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -52,7 +52,7 @@ router.post('/login', async (req: Request, res: Response) => {
     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 7 * 24 * 60 * 60 * 1000 });
     
     return res.json({ id: user.id, email: user.email, fullName: user.fullName });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -63,7 +63,7 @@ router.post('/guest', async (req: Request, res: Response) => {
     res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 });
     
     return res.json({ id: 'guest', isGuest: true, fullName: 'Guest User' });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -77,7 +77,7 @@ router.get('/me', async (req: Request, res: Response) => {
   try {
     const decoded = jsonwebtoken.verify(token, JWT_SECRET) as any;
     return res.json({ id: decoded.id, isGuest: decoded.isGuest, email: decoded.email, fullName: decoded.fullName });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return res.status(401).json({ error: 'Invalid token' });
   }
 });

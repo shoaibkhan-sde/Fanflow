@@ -44,7 +44,7 @@ export const OpsWorkspacePage: React.FC = () => {
         }
 
         // Dynamically generate incidents based on zone densities
-        incData = zoneData.map((z) => {
+        incData = zoneData.map((z): Incident => {
           let priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
           let summary = 'Normal Operations';
           let description = `Crowd density is at ${z.density}%. Operations running smoothly.`;
@@ -71,7 +71,7 @@ export const OpsWorkspacePage: React.FC = () => {
             createdAt: new Date().toISOString()
           };
         }).sort((a, b) => {
-          const pMap: any = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+          const pMap: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
           return pMap[b.priority] - pMap[a.priority];
         });
 
@@ -83,7 +83,7 @@ export const OpsWorkspacePage: React.FC = () => {
         const history = [];
         for (let i = 30; i >= 0; i -= 5) {
           const t = new Date(now.getTime() - i * 60000);
-          const dataPoint: any = { time: t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+          const dataPoint: Record<string, string | number> = { time: t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
           zoneData.forEach((z: CrowdZone) => {
             const jitter = Math.floor(Math.random() * 10 - 5);
             dataPoint[z.name] = Math.max(0, Math.min(100, z.density + jitter));

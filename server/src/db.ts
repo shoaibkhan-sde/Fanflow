@@ -169,7 +169,7 @@ export async function connectDB(): Promise<void> {
     
     // Seed initial values
     await seedDB();
-  } catch (err: any) {
+  } catch (err: unknown) {
     logJSON('ERROR', {
       requestId: 'BOOT',
       method: 'DB',
@@ -228,7 +228,7 @@ async function seedDB() {
       await mongoDb.collection('crowdZones').insertMany(memoryDb.crowdZones);
       logJSON('INFO', { requestId: 'BOOT', method: 'DB', url: 'seed', message: 'Seeded crowdZones collection.' });
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logJSON('ERROR', { requestId: 'BOOT', method: 'DB', url: 'seed', message: 'Failed database seeding.', error: err.message });
   }
 }
@@ -296,7 +296,7 @@ function startCrowdSimulation() {
           );
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logJSON('ERROR', { requestId: 'SYSTEM', method: 'DB', url: 'simulation', message: 'Crowd simulation tick failed.', error: err.message });
     }
   }, 5000);
@@ -429,7 +429,7 @@ export async function getChatHistory(sessionId: string): Promise<{ role: 'user' 
 
   const sessionDoc = await mongoDb.collection('chatSessions').findOne({ sessionId });
   if (sessionDoc && sessionDoc.messages) {
-    return sessionDoc.messages.map((m: any) => ({ role: m.role, text: m.text }));
+    return sessionDoc.messages.map((m: { role: string; text: string }) => ({ role: m.role, text: m.text }));
   }
   return [];
 }

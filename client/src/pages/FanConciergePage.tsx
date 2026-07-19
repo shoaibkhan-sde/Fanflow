@@ -124,7 +124,7 @@ export const FanConciergePage: React.FC = () => {
       
       setMessages(prev => [...prev, { role: 'model', text: data.text }]);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessages(prev => [
         ...prev,
         {

@@ -21,8 +21,8 @@ export const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let crowdData: any[] = [];
-        let incData: any[] = [];
+        let crowdData: CrowdZone[] = [];
+        let incData: Incident[] = [];
 
         try {
           const [crowdRes, incRes] = await Promise.all([
@@ -64,7 +64,7 @@ export const Home: React.FC = () => {
 
   useEffect(() => {
     // Magnetic spotlight on role cards
-    document.querySelectorAll('.role-card').forEach((card: any) => {
+    document.querySelectorAll('.role-card').forEach((card: Element) => {
       const handleMouseMove = (e: MouseEvent) => {
         const r = card.getBoundingClientRect();
         const spot = card.querySelector('.role-spot') as HTMLElement;
@@ -90,7 +90,7 @@ export const Home: React.FC = () => {
     });
 
     // Spotlight on service cards
-    document.querySelectorAll('.service-card').forEach((card: any) => {
+    document.querySelectorAll('.service-card').forEach((card: Element) => {
       const handleMouseMove = (e: MouseEvent) => {
         const r = card.getBoundingClientRect();
         const spot = card.querySelector('.service-spot') as HTMLElement;
@@ -115,7 +115,7 @@ export const Home: React.FC = () => {
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
     // Count-up numbers + bar fill on reveal
-    const animateCount = (el: any) => {
+    const animateCount = (el: HTMLElement) => {
       const target = parseInt(el.getAttribute('data-count'), 10);
       const suffix = el.getAttribute('data-suffix') || '';
       const start = performance.now();
@@ -132,7 +132,7 @@ export const Home: React.FC = () => {
     const statIO = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.querySelectorAll('.bar-fill').forEach((b: any) => {
+          entry.target.querySelectorAll('.bar-fill').forEach((b: Element) => {
             setTimeout(() => { b.style.width = b.getAttribute('data-width') + '%'; }, 150);
           });
           statIO.unobserve(entry.target);

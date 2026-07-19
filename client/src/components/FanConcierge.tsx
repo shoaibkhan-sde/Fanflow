@@ -86,7 +86,7 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
       
       // Update highlights in parent component (StadiumMap updates)
       onResponseReceived(data.highlights);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessages(prev => [
         ...prev,
         {

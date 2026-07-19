@@ -13,7 +13,7 @@ interface StadiumMapProps {
   compact?: boolean;
 }
 
-export const StadiumMap: React.FC<StadiumMapProps> = ({
+export const StadiumMap: React.FC<StadiumMapProps> = React.memo(({
   zones,
   gates,
   transitHubs,
@@ -280,4 +280,4 @@ export const StadiumMap: React.FC<StadiumMapProps> = ({
       </div>
     </div>
   );
-};
+});

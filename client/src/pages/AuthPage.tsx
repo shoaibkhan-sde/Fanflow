@@ -31,7 +31,7 @@ export function AuthPage() {
       const userData = await res.json();
       setUser(userData);
       navigate('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message);
     }
   };
@@ -53,7 +53,7 @@ export function AuthPage() {
       const userData = await res.json();
       setUser(userData);
       navigate('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message);
     }
   };
@@ -66,7 +66,7 @@ export function AuthPage() {
       const userData = await res.json();
       setUser(userData);
       navigate('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message);
     }
   };

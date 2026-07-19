@@ -38,12 +38,15 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="drawer-title"
             className="fixed inset-y-0 right-0 w-full max-w-sm glass-panel z-50 flex flex-col border-l border-slate-800"
           >
             {/* Header */}
             <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-brand-charcoal">
               <div>
-                <h2 className="text-lg font-bold text-slate-100 uppercase tracking-wide">{title}</h2>
+                <h2 id="drawer-title" className="text-lg font-bold text-slate-100 uppercase tracking-wide">{title}</h2>
                 {subtitle && <p className="text-sm text-brand-teal">{subtitle}</p>}
               </div>
               <button
