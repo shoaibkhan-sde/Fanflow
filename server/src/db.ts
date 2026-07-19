@@ -1,5 +1,5 @@
 import { MongoClient, Db } from 'mongodb';
-import { logJSON } from './middleware';
+import { getErrorMessage, logJSON } from './middleware';
 
 // Database Schema interfaces
 export interface VenueGate {
@@ -175,7 +175,7 @@ export async function connectDB(): Promise<void> {
       method: 'DB',
       url: 'connect',
       message: 'Failed standard SRV DNS lookup or credentials error. Attempting direct mongodb:// fallback connection...',
-      error: err.message
+      error: getErrorMessage(err)
     });
     
     // Fallback: If SRV lookup failed, check if we can format it into direct connection or fall back to memory
@@ -229,7 +229,7 @@ async function seedDB() {
       logJSON('INFO', { requestId: 'BOOT', method: 'DB', url: 'seed', message: 'Seeded crowdZones collection.' });
     }
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId: 'BOOT', method: 'DB', url: 'seed', message: 'Failed database seeding.', error: err.message });
+    logJSON('ERROR', { requestId: 'BOOT', method: 'DB', url: 'seed', message: 'Failed database seeding.', error: getErrorMessage(err) });
   }
 }
 
@@ -297,7 +297,7 @@ function startCrowdSimulation() {
         }
       }
     } catch (err: unknown) {
-      logJSON('ERROR', { requestId: 'SYSTEM', method: 'DB', url: 'simulation', message: 'Crowd simulation tick failed.', error: err.message });
+      logJSON('ERROR', { requestId: 'SYSTEM', method: 'DB', url: 'simulation', message: 'Crowd simulation tick failed.', error: getErrorMessage(err) });
     }
   }, 5000);
 }

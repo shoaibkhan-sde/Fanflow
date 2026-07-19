@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
-import { logJSON } from './middleware';
+import { getErrorMessage, logJSON } from './middleware';
 import { getVenueLayout, getCrowdDensities, getIncidents, CrowdZone, VenueGate, TransitHub, Incident } from './db';
 import { StadiumGraph, DensityMap } from './graph';
 let genAI: GoogleGenerativeAI | null = null;
@@ -159,7 +159,7 @@ Return ONLY the raw JSON object, no wrapping markdown blocks (e.g. no \`\`\`json
     const data = JSON.parse(cleanText) as ChatAIResponse;
     return data;
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'chat', message: 'Gemini chat processing failed. Falling back to mock engine.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'chat', message: 'Gemini chat processing failed. Falling back to mock engine.', error: getErrorMessage(err) });
     return generateMockChat(message, accessibilityMode, densities, incidents, requestId);
   }
 }
@@ -210,7 +210,7 @@ Return ONLY the raw JSON object, no wrapping markdown blocks.`;
     const data = JSON.parse(responseText.trim()) as IncidentAIResponse;
     return data;
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'triage', message: 'Gemini incident triage failed. Falling back to mock engine.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'triage', message: 'Gemini incident triage failed. Falling back to mock engine.', error: getErrorMessage(err) });
     return generateMockIncident(description, reportedBy, zoneId, requestId);
   }
 }

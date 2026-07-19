@@ -17,6 +17,8 @@ import {
   requestIdMiddleware,
   validateChatPayload,
   validateIncidentPayload,
+  getErrorMessage,
+  getErrorStatusCode,
   logJSON
 } from './middleware';
 import apiRouter from './routes';
@@ -62,10 +64,10 @@ app.use((err: unknown, req: express.Request, res: express.Response, next: expres
     method: req.method,
     url: req.originalUrl,
     message: 'Unhandled application error occurred.',
-    error: err.message || String(err)
+    error: getErrorMessage(err)
   });
 
-  return res.status(err.status || 500).json({
+  return res.status(getErrorStatusCode(err)).json({
     error: 'An internal error occurred. Please contact the administrator.'
   });
 });
@@ -90,7 +92,7 @@ async function bootstrap() {
       method: 'SERVER',
       url: 'listen',
       message: 'Failed to bootstrap backend service.',
-      error: err.message
+      error: getErrorMessage(err)
     });
     process.exit(1);
   }
