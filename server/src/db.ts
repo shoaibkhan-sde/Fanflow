@@ -427,10 +427,8 @@ export async function getChatHistory(sessionId: string): Promise<{ role: 'user' 
     return session ? session.messages.map(m => ({ role: m.role, text: m.text })) : [];
   }
 
-  if (session && session.messages) {
-    return session.messages.map((m: any) => ({ role: m.role, text: m.text }));
-  }
-  return [];
+  const session = await mongoDb.collection('chatSessions').findOne({ sessionId }) as ChatSession | null;
+  return session ? session.messages.map(m => ({ role: m.role, text: m.text })) : [];
 }
 
 export async function getDbUserByEmail(email: string): Promise<User | null> {
