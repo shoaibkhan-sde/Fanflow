@@ -21,6 +21,7 @@ export function AuthPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
       if (!res.ok) {
@@ -42,6 +43,7 @@ export function AuthPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password, fullName })
       });
       if (!res.ok) {
@@ -59,7 +61,7 @@ export function AuthPage() {
   const handleGuest = async () => {
     setError('');
     try {
-      const res = await fetch('/api/auth/guest', { method: 'POST' });
+      const res = await fetch('/api/auth/guest', { method: 'POST', credentials: 'include' });
       if (!res.ok) throw new Error('Failed to create guest session');
       const userData = await res.json();
       setUser(userData);
