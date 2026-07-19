@@ -53,6 +53,17 @@ export function getRequestId(req: Request): string {
   return (req.headers['x-request-id'] as string) || 'unknown';
 }
 
+export function getErrorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+export function getErrorStatusCode(err: unknown): number {
+  if (typeof err === 'object' && err !== null && 'status' in err && typeof err.status === 'number') {
+    return err.status;
+  }
+  return 500;
+}
+
 // Payload Validation Middleware
 export function validateChatPayload(req: Request, res: Response, next: NextFunction) {
   const { message, accessibilityMode } = req.body;
