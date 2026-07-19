@@ -427,8 +427,9 @@ export async function getChatHistory(sessionId: string): Promise<{ role: 'user' 
     return session ? session.messages.map(m => ({ role: m.role, text: m.text })) : [];
   }
 
-  if (session && session.messages) {
-    return session.messages.map((m: any) => ({ role: m.role, text: m.text }));
+  const sessionDoc = await mongoDb.collection('chatSessions').findOne({ sessionId });
+  if (sessionDoc && sessionDoc.messages) {
+    return sessionDoc.messages.map((m: any) => ({ role: m.role, text: m.text }));
   }
   return [];
 }
