@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { ChatMessage, ChatAIResponse } from '../types';
 import { Send, Compass, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -16,7 +16,6 @@ interface FanConciergeProps {
 export const FanConcierge: React.FC<FanConciergeProps> = ({
   onResponseReceived,
   accessibilityMode,
-  setAccessibilityMode,
   externalQuery,
   onClearExternalQuery
 }) => {
@@ -53,7 +52,7 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
     { label: '⚡ Decision Support', text: 'Should I enter through Gate-4 or Gate-1 right now considering capacity?' }
   ];
 
-  const handleSendMessage = async (textToSend: string) => {
+  const handleSendMessage = useCallback(async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
 
     const userMsg: ChatMessage = { role: 'user', text: textToSend };
@@ -97,7 +96,7 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
       // Auto refocus input for keyboard users
       chatInputRef.current?.focus();
     }
-  };
+  }, [isLoading, accessibilityMode, onResponseReceived]);
 
   useEffect(() => {
     if (externalQuery) {
@@ -212,7 +211,7 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
   return (
     <div className="fixed bottom-16 sm:bottom-20 right-4 sm:right-6 w-[calc(100vw-2rem)] sm:w-96 h-[520px] max-h-[calc(100vh-6rem)] sm:max-h-[calc(100vh-9.5rem)] z-50 shadow-2xl flex flex-col">
       <div className={`flex flex-col h-full border rounded-2xl bg-emerald-900 transition-all ${
-        highContrast ? 'border-lime-400 border-2' : 'border-emerald-800'
+        accessibilityMode ? 'border-lime-400 border-2' : 'border-emerald-800'
       }`}>
         {/* Top Header & Controls */}
         <div className="p-4 border-b border-emerald-800 flex items-center justify-between gap-3 bg-emerald-900/60 rounded-t-2xl">
@@ -242,8 +241,8 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
         {/* Messages Window */}
         <div 
           className={`flex-1 p-4 overflow-y-auto space-y-4 min-h-[200px] ${
-            fontSizeLarge ? 'text-lg' : 'text-sm'
-          } ${highContrast ? 'bg-black' : 'bg-emerald-950/30'}`}
+            accessibilityMode ? 'text-lg' : 'text-sm'
+          } ${accessibilityMode ? 'bg-black' : 'bg-emerald-950/30'}`}
           role="log"
           aria-label="Chat messages history"
         >
@@ -255,10 +254,10 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
               <div
                 className={`max-w-[85%] rounded-2xl p-3.5 border transition-all ${
                   msg.role === 'user'
-                    ? highContrast
+                    ? accessibilityMode
                       ? 'bg-emerald-100 text-emerald-900 border-white font-bold'
                       : 'bg-teal-600/10 text-teal-100 border-lime-500/20'
-                    : highContrast
+                    : accessibilityMode
                       ? 'bg-black text-white border-2 border-lime-400 font-medium'
                       : 'bg-emerald-900 text-emerald-100 border-emerald-800/80'
                 }`}
@@ -305,7 +304,7 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
               disabled={isLoading}
               tabIndex={0}
               className={`text-[11px] px-3 py-1.5 rounded-full border bg-emerald-900 transition-all font-medium ${
-                highContrast
+                accessibilityMode
                   ? 'border-white text-white hover:bg-emerald-50 hover:text-emerald-900'
                   : 'border-emerald-800 text-emerald-200 hover:border-lime-500/40 hover:text-lime-400'
               }`}

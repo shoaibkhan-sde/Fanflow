@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
 import { StadiumMap } from '../StadiumMap';
 import * as matchers from 'vitest-axe/matchers';
 import { axe } from 'vitest-axe';
@@ -57,8 +57,7 @@ describe('StadiumMap', () => {
   it('shows ADA compliance info in legend or tooltips', () => {
     render(<StadiumMap {...mockProps} />);
     // ADA label should appear somewhere in the legend
-    const adaText = screen.queryByText(/ADA/i);
-    // ADA text might or might not appear — check the container is rendered
+    expect(screen.queryByText(/ADA/i)).not.toBeNull();
     expect(document.body).toBeTruthy();
   });
 

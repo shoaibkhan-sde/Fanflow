@@ -12,7 +12,6 @@ interface NavBarProps {
 }
 
 export const NavBar: React.FC<NavBarProps> = ({
-  venueName,
   activePersona,
   setActivePersona,
   setMapHighlights,

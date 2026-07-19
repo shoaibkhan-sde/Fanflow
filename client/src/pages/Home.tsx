@@ -40,10 +40,10 @@ export const Home: React.FC = () => {
         // Mock Fallback Data matching OpsWorkspace & Visualizer
         if (!crowdData || crowdData.length === 0) {
           crowdData = [
-            { zoneId: 'z1', name: 'North Stand', density: 86 },
-            { zoneId: 'z2', name: 'East Stand', density: 70 },
-            { zoneId: 'z3', name: 'South Stand', density: 55 },
-            { zoneId: 'z4', name: 'West Stand', density: 49 }
+            { zoneId: 'z1', name: 'North Stand', density: 86, capacity: 10000, currentCount: 8600, status: 'HIGH', updatedAt: new Date().toISOString() },
+            { zoneId: 'z2', name: 'East Stand', density: 70, capacity: 12000, currentCount: 8400, status: 'MEDIUM', updatedAt: new Date().toISOString() },
+            { zoneId: 'z3', name: 'South Stand', density: 55, capacity: 10000, currentCount: 5500, status: 'LOW', updatedAt: new Date().toISOString() },
+            { zoneId: 'z4', name: 'West Stand', density: 49, capacity: 12000, currentCount: 5880, status: 'LOW', updatedAt: new Date().toISOString() }
           ];
         }
 
@@ -66,6 +66,7 @@ export const Home: React.FC = () => {
   useEffect(() => {
     // Magnetic spotlight on role cards
     document.querySelectorAll('.role-card').forEach((card: Element) => {
+      const htmlCard = card as HTMLElement;
       const handleMouseMove = (e: MouseEvent) => {
         const r = card.getBoundingClientRect();
         const spot = card.querySelector('.role-spot') as HTMLElement;
@@ -75,18 +76,18 @@ export const Home: React.FC = () => {
         }
         const cx = (e.clientX - r.left) / r.width - 0.5;
         const cy = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform = `perspective(600px) rotateY(${cx * 4}deg) rotateX(${-cy * 4}deg) translateY(-2px)`;
+        htmlCard.style.transform = `perspective(600px) rotateY(${cx * 4}deg) rotateX(${-cy * 4}deg) translateY(-2px)`;
       };
       const handleMouseLeave = () => {
-        card.style.transform = '';
+        htmlCard.style.transform = '';
       };
 
-      card.addEventListener('mousemove', handleMouseMove as EventListener);
-      card.addEventListener('mouseleave', handleMouseLeave);
+      htmlCard.addEventListener('mousemove', handleMouseMove as EventListener);
+      htmlCard.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-        card.removeEventListener('mousemove', handleMouseMove as EventListener);
-        card.removeEventListener('mouseleave', handleMouseLeave);
+        htmlCard.removeEventListener('mousemove', handleMouseMove as EventListener);
+        htmlCard.removeEventListener('mouseleave', handleMouseLeave);
       };
     });
 
@@ -139,7 +140,8 @@ export const Home: React.FC = () => {
             animateCount(el as HTMLElement);
           });
           entry.target.querySelectorAll('.bar-fill').forEach((b: Element) => {
-            setTimeout(() => { b.style.width = b.getAttribute('data-width') + '%'; }, 150);
+            const htmlB = b as HTMLElement;
+            setTimeout(() => { htmlB.style.width = htmlB.getAttribute('data-width') + '%'; }, 150);
           });
           statIO.unobserve(entry.target);
         }

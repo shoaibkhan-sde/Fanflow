@@ -159,7 +159,7 @@ Return ONLY the raw JSON object, no wrapping markdown blocks (e.g. no \`\`\`json
     const data = JSON.parse(cleanText) as ChatAIResponse;
     return data;
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'chat', message: 'Gemini chat processing failed. Falling back to mock engine.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'chat', message: 'Gemini chat processing failed. Falling back to mock engine.', error: err instanceof Error ? err.message : String(err) });
     return generateMockChat(message, accessibilityMode, densities, incidents, requestId);
   }
 }
@@ -210,7 +210,7 @@ Return ONLY the raw JSON object, no wrapping markdown blocks.`;
     const data = JSON.parse(responseText.trim()) as IncidentAIResponse;
     return data;
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'triage', message: 'Gemini incident triage failed. Falling back to mock engine.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GEMINI', url: 'triage', message: 'Gemini incident triage failed. Falling back to mock engine.', error: err instanceof Error ? err.message : String(err) });
     return generateMockIncident(description, reportedBy, zoneId, requestId);
   }
 }

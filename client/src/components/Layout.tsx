@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Activity, Map as MapIcon, Accessibility, User, Compass, Shield, MoreVertical, LogOut } from 'lucide-react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Map as MapIcon, Accessibility, User, Compass, Shield, MoreVertical, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useMatch, TEAM_CONFIG } from '../context/MatchContext';
 import fifaLogo from '../../public/fifa-logo.png';
 
 export const Layout: React.FC = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
   const { homeScore, awayScore, matchStatus } = useMatch();
   
-  const isOps = location.pathname.includes('/ops');
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [isMobileMoreOpen, setIsMobileMoreOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);

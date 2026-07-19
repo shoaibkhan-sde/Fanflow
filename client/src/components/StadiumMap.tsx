@@ -16,7 +16,6 @@ interface StadiumMapProps {
 export const StadiumMap: React.FC<StadiumMapProps> = React.memo(({
   zones,
   gates,
-  transitHubs,
   highlights,
   activeIncidentZones,
   activeFilter = null,
@@ -35,12 +34,6 @@ export const StadiumMap: React.FC<StadiumMapProps> = React.memo(({
     gates.forEach(g => map.set(g.gateId, g));
     return map;
   }, [gates]);
-
-  const transitMap = useMemo(() => {
-    const map = new Map<string, TransitHub>();
-    transitHubs.forEach(t => map.set(t.hubId, t));
-    return map;
-  }, [transitHubs]);
 
   // Command center colors based on design tokens
   const getDensityColor = (density: number) => {

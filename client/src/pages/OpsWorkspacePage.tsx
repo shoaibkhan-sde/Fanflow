@@ -8,7 +8,7 @@ import type { Incident, CrowdZone } from '../types';
 export const OpsWorkspacePage: React.FC = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [zones, setZones] = useState<CrowdZone[]>([]);
-  const [densityHistory, setDensityHistory] = useState<{ time: string; avg: number }[]>([]);
+  const [densityHistory, setDensityHistory] = useState<Record<string, string | number>[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   useEffect(() => {
