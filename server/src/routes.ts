@@ -12,7 +12,7 @@ router.get('/venue', async (req: Request, res: Response) => {
     const layout = await getVenueLayout();
     return res.json(layout);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GET', url: '/api/venue', message: 'Failed fetching venue layout.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GET', url: '/api/venue', message: 'Failed fetching venue layout.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -24,7 +24,7 @@ router.get('/crowd', async (req: Request, res: Response) => {
     const densities = await getCrowdDensities();
     return res.json(densities);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GET', url: '/api/crowd', message: 'Failed fetching crowd densities.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GET', url: '/api/crowd', message: 'Failed fetching crowd densities.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -36,7 +36,7 @@ router.get('/facilities', async (req: Request, res: Response) => {
     const facilities = await getFacilities();
     return res.json(facilities);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GET', url: '/api/facilities', message: 'Failed fetching facilities.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GET', url: '/api/facilities', message: 'Failed fetching facilities.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -63,7 +63,7 @@ router.post('/chat', async (req: Request, res: Response) => {
     // 4. Return structured response
     return res.json(aiResponse);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'POST', url: '/api/chat', message: 'Chat process failed.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'POST', url: '/api/chat', message: 'Chat process failed.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -76,7 +76,7 @@ router.get('/chat/history', async (req: Request, res: Response) => {
     const history = await getChatHistory(sessionId);
     return res.json(history);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GET', url: '/api/chat/history', message: 'Failed retrieving chat history.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GET', url: '/api/chat/history', message: 'Failed retrieving chat history.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -105,7 +105,7 @@ router.post('/incidents', async (req: Request, res: Response) => {
     logJSON('INFO', { requestId, method: 'POST', url: '/api/incidents', message: `Incident successfully logged with priority ${triage.priority}` });
     return res.status(201).json(logged);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'POST', url: '/api/incidents', message: 'Failed logging incident.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'POST', url: '/api/incidents', message: 'Failed logging incident.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -117,7 +117,7 @@ router.get('/incidents', async (req: Request, res: Response) => {
     const incidents = await getIncidents();
     return res.json(incidents);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'GET', url: '/api/incidents', message: 'Failed fetching incidents.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'GET', url: '/api/incidents', message: 'Failed fetching incidents.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -139,7 +139,7 @@ router.post('/test/density', async (req: Request, res: Response) => {
     const densities = await getCrowdDensities();
     return res.json(densities);
   } catch (err: unknown) {
-    logJSON('ERROR', { requestId, method: 'POST', url: '/api/test/density', message: 'Failed updating density manually.', error: err.message });
+    logJSON('ERROR', { requestId, method: 'POST', url: '/api/test/density', message: 'Failed updating density manually.', error: err instanceof Error ? err.message : String(err) });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });

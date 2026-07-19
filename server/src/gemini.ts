@@ -24,7 +24,7 @@ export interface ChatAIResponse {
 
 export interface IncidentAIResponse {
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  category: 'security' | 'medical' | 'maintenance' | 'transit' | 'other';
+  category: 'security' | 'medical' | 'maintenance' | 'transit' | 'crowd' | 'other';
   summary: string;
 }
 

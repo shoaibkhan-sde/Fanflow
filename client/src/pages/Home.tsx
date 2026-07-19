@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Github } from 'lucide-react';
+import type { CrowdZone, Incident } from '../types';
 
 const SERVICES = [
   { icon: '<path d="M3 3h18M4 3v11a2 2 0 002 2h12a2 2 0 002-2V3M9 21v-6h6v6"/>', tag: 'New', title: 'Food & drink pre-order', desc: 'Order ahead and skip the concession line entirely.' },
@@ -15,8 +16,8 @@ const SERVICES = [
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [zones, setZones] = useState<any[]>([]);
-  const [incidents, setIncidents] = useState<any[]>([]);
+  const [zones, setZones] = useState<CrowdZone[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,10 +58,10 @@ export const Home: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const overallCapacity = zones.length > 0 ? Math.round(zones.reduce((acc, z) => acc + z.density, 0) / zones.length) : 64;
-  const avgWaitTime = zones.length > 0 ? Math.max(2, Math.round(overallCapacity / 10)) : 6;
-  const criticalZones = zones.filter(z => z.density >= 80).length;
-  const activeAlerts = incidents.filter(i => i.status === 'active').length + criticalZones;
+  const overallCapacity = useMemo(() => zones.length > 0 ? Math.round(zones.reduce((acc, z) => acc + z.density, 0) / zones.length) : 64, [zones]);
+  const avgWaitTime = useMemo(() => zones.length > 0 ? Math.max(2, Math.round(overallCapacity / 10)) : 6, [zones, overallCapacity]);
+  const criticalZones = useMemo(() => zones.filter(z => z.density >= 80).length, [zones]);
+  const activeAlerts = useMemo(() => incidents.filter(i => i.status === 'active').length + criticalZones, [incidents, criticalZones]);
 
   useEffect(() => {
     // Magnetic spotlight on role cards
@@ -80,11 +81,11 @@ export const Home: React.FC = () => {
         card.style.transform = '';
       };
 
-      card.addEventListener('mousemove', handleMouseMove);
+      card.addEventListener('mousemove', handleMouseMove as EventListener);
       card.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-        card.removeEventListener('mousemove', handleMouseMove);
+        card.removeEventListener('mousemove', handleMouseMove as EventListener);
         card.removeEventListener('mouseleave', handleMouseLeave);
       };
     });
@@ -99,8 +100,8 @@ export const Home: React.FC = () => {
           spot.style.top = (e.clientY - r.top - 90) + 'px';
         }
       };
-      card.addEventListener('mousemove', handleMouseMove);
-      return () => card.removeEventListener('mousemove', handleMouseMove);
+      card.addEventListener('mousemove', handleMouseMove as EventListener);
+      return () => card.removeEventListener('mousemove', handleMouseMove as EventListener);
     });
 
     // Scroll reveal
@@ -116,7 +117,9 @@ export const Home: React.FC = () => {
 
     // Count-up numbers + bar fill on reveal
     const animateCount = (el: HTMLElement) => {
-      const target = parseInt(el.getAttribute('data-count'), 10);
+      const rawTarget = el.getAttribute('data-count');
+      if (!rawTarget) return;
+      const target = parseInt(rawTarget, 10);
       const suffix = el.getAttribute('data-suffix') || '';
       const start = performance.now();
       const dur = 900;
@@ -132,6 +135,9 @@ export const Home: React.FC = () => {
     const statIO = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.stat-num').forEach((el: Element) => {
+            animateCount(el as HTMLElement);
+          });
           entry.target.querySelectorAll('.bar-fill').forEach((b: Element) => {
             setTimeout(() => { b.style.width = b.getAttribute('data-width') + '%'; }, 150);
           });

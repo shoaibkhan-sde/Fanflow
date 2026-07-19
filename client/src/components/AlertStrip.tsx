@@ -12,7 +12,7 @@ export const AlertStrip: React.FC<AlertStripProps> = ({ incidents, onIncidentCli
   const activeIncidents = incidents.filter(i => i.status === 'active');
   
   return (
-    <div className="w-full h-10 border-y border-slate-800 bg-brand-charcoal/90 backdrop-blur flex items-center overflow-hidden">
+    <div role="region" aria-label="Live Operations Alerts" className="w-full h-10 border-y border-slate-800 bg-brand-charcoal/90 backdrop-blur flex items-center overflow-hidden">
       <div className="flex-none px-4 py-2 bg-brand-navy border-r border-slate-800 h-full flex items-center gap-2 z-10">
         <span className="relative flex h-2 w-2">
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${activeIncidents.length > 0 ? 'bg-brand-red' : 'bg-brand-teal'}`}></span>

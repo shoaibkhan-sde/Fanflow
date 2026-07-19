@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type { ChatMessage, ChatAIResponse } from '../types';
-import { Send, Accessibility, Compass, Minimize2 } from 'lucide-react';
+import { Send, Compass, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
@@ -28,8 +28,6 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [highContrast, setHighContrast] = useState(false);
-  const [fontSizeLarge, setFontSizeLarge] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -110,7 +108,7 @@ export const FanConcierge: React.FC<FanConciergeProps> = ({
         onClearExternalQuery();
       }
     }
-  }, [externalQuery, onClearExternalQuery]);
+  }, [externalQuery, onClearExternalQuery, handleSendMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

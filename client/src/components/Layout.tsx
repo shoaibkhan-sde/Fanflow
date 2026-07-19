@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Activity, MessageSquare, Map as MapIcon, Accessibility, User, MapPin, Compass, Shield, MoreVertical, LogOut } from 'lucide-react';
+import { Activity, Map as MapIcon, Accessibility, User, Compass, Shield, MoreVertical, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useMatch, TEAM_CONFIG } from '../context/MatchContext';
 import fifaLogo from '../../public/fifa-logo.png';
@@ -25,9 +25,6 @@ export const Layout: React.FC = () => {
     setUser(null);
     navigate('/auth');
   };
-  
-  // Role-aware subtle accent shift for the context strip
-  const themeAccent = isOps ? 'text-brand-amber' : 'text-brand-teal';
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-navy relative overflow-hidden">

@@ -7,44 +7,82 @@ import { axe } from 'vitest-axe';
 
 expect.extend(matchers);
 
-const mockIncidents: Incident[] = [
-  {
-    incidentId: '1',
-    zoneId: 'North Stand',
-    category: 'crowd',
-    priority: 'HIGH',
-    status: 'active',
-    summary: 'High Crowd Density',
-    description: 'Crowd density > 80%',
-    reportedBy: 'system',
-    createdAt: new Date().toISOString()
-  }
-];
+const mockIncidentHigh: Incident = {
+  incidentId: 'test-1',
+  description: 'North Stand is at 95% capacity',
+  reportedBy: 'system',
+  zoneId: 'Zone-A',
+  priority: 'HIGH',
+  category: 'crowd',
+  summary: 'Critical Crowd Alert',
+  status: 'active',
+  createdAt: new Date().toISOString()
+};
 
-describe('AlertStrip', () => {
-  it('renders correctly with incidents', () => {
-    render(<AlertStrip incidents={mockIncidents} />);
-    expect(screen.getByText(/High Crowd Density/)).toBeInTheDocument();
-    expect(screen.getByText(/North Stand/)).toBeInTheDocument();
+const mockIncidentMedium: Incident = {
+  incidentId: 'test-2',
+  description: 'East Stand queue forming',
+  reportedBy: 'volunteer',
+  zoneId: 'Zone-B',
+  priority: 'MEDIUM',
+  category: 'crowd',
+  summary: 'Elevated Crowd Density',
+  status: 'active',
+  createdAt: new Date().toISOString()
+};
+
+const resolvedIncident: Incident = {
+  ...mockIncidentHigh,
+  incidentId: 'test-3',
+  status: 'resolved',
+  summary: 'Old Resolved Incident'
+};
+
+describe('AlertStrip component', () => {
+  it('renders the Live Ops indicator', () => {
+    render(<AlertStrip incidents={[]} />);
+    expect(screen.getByText('Live Ops')).toBeInTheDocument();
   });
 
-  it('renders no active incidents state', () => {
+  it('shows "All zones operating normally" when no active incidents', () => {
     render(<AlertStrip incidents={[]} />);
     expect(screen.getByText(/All zones operating normally/i)).toBeInTheDocument();
   });
 
-  it('calls onIncidentClick when an incident is clicked', () => {
-    const handleClick = vi.fn();
-    render(<AlertStrip incidents={mockIncidents} onIncidentClick={handleClick} />);
-    
-    fireEvent.click(screen.getByText('High Crowd Density'));
-    expect(handleClick).toHaveBeenCalledWith(mockIncidents[0]);
+  it('does not show resolved incidents in the strip', () => {
+    render(<AlertStrip incidents={[resolvedIncident]} />);
+    expect(screen.queryByText(/Old Resolved Incident/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/All zones operating normally/i)).toBeInTheDocument();
   });
 
-  it('passes accessibility tests', async () => {
-    const { container } = render(<AlertStrip incidents={mockIncidents} />);
+  it('displays HIGH priority incident summary', () => {
+    render(<AlertStrip incidents={[mockIncidentHigh]} />);
+    expect(screen.getByText(/Critical Crowd Alert/i)).toBeInTheDocument();
+  });
+
+  it('displays MEDIUM priority incident', () => {
+    render(<AlertStrip incidents={[mockIncidentMedium]} />);
+    expect(screen.getByText(/Elevated Crowd Density/i)).toBeInTheDocument();
+  });
+
+  it('calls onIncidentClick when clicking an incident', () => {
+    const onClick = vi.fn();
+    render(<AlertStrip incidents={[mockIncidentHigh]} onIncidentClick={onClick} />);
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+    expect(onClick).toHaveBeenCalledWith(mockIncidentHigh);
+  });
+
+  it('renders multiple active incidents', () => {
+    render(<AlertStrip incidents={[mockIncidentHigh, mockIncidentMedium]} />);
+    expect(screen.getByText(/Critical Crowd Alert/i)).toBeInTheDocument();
+    expect(screen.getByText(/Elevated Crowd Density/i)).toBeInTheDocument();
+  });
+
+  it('passes accessibility audit', async () => {
+    const { container } = render(<AlertStrip incidents={[mockIncidentHigh]} />);
     const results = await axe(container);
-    // @ts-ignore - vitest-axe types don't automatically augment Vitest's expect in all setups
+    // @ts-ignore - vitest-axe augmentation
     expect(results).toHaveNoViolations();
   });
 });

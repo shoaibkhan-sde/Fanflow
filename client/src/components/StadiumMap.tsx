@@ -250,7 +250,6 @@ export const StadiumMap: React.FC<StadiumMapProps> = React.memo(({
             { id: 'Hub-2', title: 'Bus Terminal West', x: 15, y: 270, label: 'BUS', type: 'Electric Shuttle (Zero Emission)', color: '#10b981' },
             { id: 'Hub-3', title: 'Rideshare Zone South', x: 230, y: 350, label: 'RIDE', type: 'Taxi/Rideshare', color: '#fb923c' }
           ].map(hub => {
-            const h = transitMap.get(hub.id);
             const hasHighlight = highlights.includes(hub.id);
             return (
               <g 

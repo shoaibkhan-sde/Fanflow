@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { CrowdZone, Incident } from '../types';
 import { AlertOctagon, Activity, PlusCircle, Wrench, Shield, Users, Leaf, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

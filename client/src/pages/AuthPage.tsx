@@ -32,7 +32,7 @@ export function AuthPage() {
       setUser(userData);
       navigate('/');
     } catch (err: unknown) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
     }
   };
 
@@ -54,7 +54,7 @@ export function AuthPage() {
       setUser(userData);
       navigate('/');
     } catch (err: unknown) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
     }
   };
 
@@ -67,7 +67,7 @@ export function AuthPage() {
       setUser(userData);
       navigate('/');
     } catch (err: unknown) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
     }
   };
 

@@ -26,9 +26,9 @@ interface MatchContextType {
 const MatchContext = createContext<MatchContextType | undefined>(undefined);
 
 export const MatchProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [homeScore, setHomeScore] = useState(0);
-  const [awayScore, setAwayScore] = useState(0);
-  const [matchStatus, setMatchStatus] = useState<MatchStatus>("live");
+  const [homeScore] = useState(0);
+  const [awayScore] = useState(0);
+  const [matchStatus] = useState<MatchStatus>("live");
   
   const [activeGoalCelebration, setActiveGoalCelebration] = useState<CelebrationData | null>(null);
   const [activeWinnerCelebration, setActiveWinnerCelebration] = useState<{ side: "home" | "away" } | null>(null);

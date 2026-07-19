@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, Activity, Shield, Accessibility, ChevronDown, MoreVertical } from 'lucide-react';
+import { Compass, Activity, Shield, Accessibility, MoreVertical } from 'lucide-react';
 import fifaLogo from '../../public/fifa-logo.png';
 
 interface NavBarProps {

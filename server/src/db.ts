@@ -41,7 +41,7 @@ export interface Incident {
   reportedBy: 'volunteer' | 'staff';
   zoneId: string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  category: string;
+  category: 'security' | 'medical' | 'maintenance' | 'transit' | 'crowd' | 'other';
   summary: string;
   status: 'active' | 'resolved';
   createdAt: Date;

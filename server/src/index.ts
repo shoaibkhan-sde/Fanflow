@@ -62,10 +62,10 @@ app.use((err: unknown, req: express.Request, res: express.Response, next: expres
     method: req.method,
     url: req.originalUrl,
     message: 'Unhandled application error occurred.',
-    error: err.message || String(err)
+    error: err instanceof Error ? (err.message || String(err)) : String(err)
   });
 
-  return res.status(err.status || 500).json({
+  return res.status((err instanceof Error && 'status' in err) ? (err as Error & {status: number}).status : 500).json({
     error: 'An internal error occurred. Please contact the administrator.'
   });
 });
@@ -90,7 +90,7 @@ async function bootstrap() {
       method: 'SERVER',
       url: 'listen',
       message: 'Failed to bootstrap backend service.',
-      error: err.message
+      error: err instanceof Error ? err.message : String(err)
     });
     process.exit(1);
   }

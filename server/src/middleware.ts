@@ -136,10 +136,11 @@ export const configuredHelmet = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      connectSrc: ["'self'", "http://localhost:5000", "https://api.sandbox.gemini.google.com"]
+      imgSrc: ["'self'", "data:", "https://flagcdn.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "http://localhost:5000", "https://generativelanguage.googleapis.com"]
     }
   }
 });

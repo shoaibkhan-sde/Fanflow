@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { CrowdZone, Incident } from '../types';
-import { Pause, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMatch, TEAM_CONFIG } from '../context/MatchContext';
 
 const ALERT_LEVELS = ["Low", "Elevated", "High", "Critical"];
@@ -22,8 +22,7 @@ export const VisualizerPage: React.FC = () => {
 
   const { 
     homeScore, 
-    awayScore, 
-    matchStatus, 
+    awayScore,
     activeGoalCelebration, 
     activeWinnerCelebration,
     clearCelebrations
@@ -64,15 +63,16 @@ export const VisualizerPage: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      clearCelebrations();
+    }
+  }, [clearCelebrations]);
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        clearCelebrations();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [handleEscape]);
 
 
 
@@ -84,7 +84,7 @@ export const VisualizerPage: React.FC = () => {
 
     stands.forEach(id => {
       const realZone = zones.find(z => z.name.toLowerCase().includes(id));
-      const defaults: Record<string, string | number> = {
+    const defaults: Record<string, { density: number }> = {
         north: { density: 86 },
         east: { density: 70 },
         south: { density: 55 },
@@ -98,7 +98,7 @@ export const VisualizerPage: React.FC = () => {
       }
     });
 
-    setActiveStandId(minStand as any);
+    setActiveStandId(minStand as 'north' | 'east' | 'south' | 'west');
   }, [zones]);
 
   // Map API zones to the 4 stands
@@ -108,7 +108,7 @@ export const VisualizerPage: React.FC = () => {
     const alertLevel = alertOverrides[id] || 'Low';
     
     // Default mock data matching the HTML mockup if API data isn't loaded yet
-    const defaults: Record<string, string | number> = {
+    const defaults: Record<string, { name: string; density: number; desc: string }> = {
       north: { name: "North Stand", density: 86, desc: "Heavy queue formation observed at North turning lanes. Wait times adjusting upwards." },
       east: { name: "East Stand", density: 70, desc: "Main gates flowing steadily. Structural entry pathways running normal." },
       south: { name: "South Stand", density: 55, desc: "Wait time at gates is estimated at 4 mins. System parameters are running and safe for immediate access." },
