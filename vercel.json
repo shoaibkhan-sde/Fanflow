@@ -19,12 +19,11 @@
       "dest": "/server/src/index.ts"
     },
     {
-      "src": "/(assets/.*)",
-      "dest": "/client/$1"
+      "src": "/assets/(.*)",
+      "dest": "/client/assets/$1"
     },
     {
-      "src": "/(vite\\.svg|favicon\\.ico|manifest\\.json)",
-      "dest": "/client/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
