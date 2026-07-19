@@ -1,10 +1,16 @@
-# Fanflow
+# Fanflow AI
 
-Fanflow is a GenAI-enabled stadium operations coordination and real-time fan routing platform designed for the FIFA World Cup 2026.
+🏟️ Built Fanflow AI — a GenAI stadium operations and real-time fan routing platform for the FIFA World Cup 2026.
+
+The problem: navigating mega-events is chaotic. Fans face unexpected bottlenecks, and staff lack real-time context. Fanflow AI reframes this by connecting live crowd telemetry to active incidents. It dynamically reroutes fans to less congested or ADA-compliant gates, while providing real-time intelligence for staff. Suddenly, crowd control is proactive, not reactive.
+
+Under the hood: a React 19 + TypeScript SPA with Tailwind CSS v4, an Express backend, and full accessibility—including high-contrast themes and dedicated ADA routing modes.
+
+The centerpiece is the Fan Concierge, powered by Gemini 1.5 Flash. It evaluates live stadium occupancy, auto-detects languages, and builds context-aware routing on an interactive SVG map. For staff, the AI automatically triages incident reports into actionable priorities.
+
+Goal: make event navigation feel effortless, not overwhelming. ⚽
 
 ## Challenge Alignment
-
-Fanflow addresses the challenges of large-scale event navigation, transit coordination, accessibility, and multilingual assistance through a unified database model and Gemini context-aware prompting. By matching real-time simulated telemetry (zone crowd densities) and active incident reports against fan queries, the system dynamically reroutes fans to lower-density gates, suggests wheelchair-accessible routes (ADA-compliant paths), and recommends zero-emission transit networks (Metro and Electric Bus routes). For volunteers and venue staff, raw reports are automatically triaged by Gemini for priority ranking and category summaries, generating a real-time operational intelligence feed for on-ground decision support. All fan interfaces are zero-config, auto-translating output back to the fan's native tongue.
 
 ---
 
