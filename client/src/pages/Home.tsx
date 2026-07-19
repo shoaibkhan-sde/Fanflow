@@ -289,8 +289,8 @@ export const Home: React.FC = () => {
         .footer-col a { color: var(--text-2); text-decoration: none; font-size: 13px; cursor: pointer; }
         .footer-col a:hover { color: var(--text-1); }
         .transit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; color: var(--text-2); }
-        .transit-dot { width: 6px; height: 6px; border-radius: 50%; }
-        .footer-bottom { border-top: 1px solid var(--border); padding: 18px 0; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-3); }
+        .transit-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .footer-bottom { border-top: 1px solid var(--border); padding: 18px 0; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-3); gap: 12px; flex-wrap: wrap; }
         .footer-bottom span em { color: var(--text-2); font-style: normal; }
 
         @media(max-width:900px) {
@@ -298,8 +298,19 @@ export const Home: React.FC = () => {
           .stats { grid-template-columns: 1fr 1fr; }
           .services { grid-template-columns: 1fr 1fr; }
           .teaser { grid-template-columns: 1fr; }
-          .footer-grid { grid-template-columns: 1fr 1fr; }
+          .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
           .hero-title { font-size: 32px; }
+          .home-footer { padding-top: 36px; }
+        }
+        @media(max-width:600px) {
+          .footer-grid { grid-template-columns: 1fr; gap: 28px; padding-bottom: 24px; }
+          .footer-col p { max-width: 100%; }
+          .footer-col:first-child { padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+          .home-footer { padding-top: 28px; }
+          .footer-bottom { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px 0; }
+          .footer-bottom > div { width: 100%; justify-content: flex-start; }
+          .stats { grid-template-columns: 1fr 1fr; }
+          .services { grid-template-columns: 1fr; }
         }
       `}</style>
 
