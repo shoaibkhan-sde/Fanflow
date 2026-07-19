@@ -197,7 +197,7 @@ export const Layout: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto p-4 md:p-6 overflow-x-hidden relative">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto p-3 sm:p-4 md:p-6 overflow-x-hidden relative">
         <Outlet />
       </main>
     </div>

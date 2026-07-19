@@ -103,7 +103,7 @@ export const OpsWorkspacePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)]">
+    <div className="flex flex-col min-h-[calc(100dvh-100px)] md:h-[calc(100dvh-100px)]">
       <AlertStrip incidents={incidents} onIncidentClick={setSelectedIncident} />
       
       <div className="flex-1 overflow-y-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">

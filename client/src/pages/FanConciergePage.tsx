@@ -152,7 +152,7 @@ export const FanConciergePage: React.FC = () => {
   };
 
   return (
-    <div className="-mx-4 md:-mx-6 -my-4 md:-my-6 flex h-[calc(100vh-111px)] assistant-container overflow-hidden">
+    <div className="-mx-4 md:-mx-6 -my-4 md:-my-6 flex flex-col md:flex-row min-h-[calc(100dvh-111px)] md:h-[calc(100dvh-111px)] assistant-container md:overflow-hidden overflow-y-auto">
       <style>{`
         .assistant-container {
           --bg: #0e0b1a;

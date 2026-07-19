@@ -156,7 +156,7 @@ export const VisualizerPage: React.FC = () => {
   };
 
   return (
-    <div className="-mx-4 md:-mx-6 -my-4 md:-my-6 bg-white h-[calc(100vh-111px)] overflow-hidden p-6 md:p-10 text-[#110F18] font-sans flex items-center justify-center relative">
+    <div className="-mx-4 md:-mx-6 -my-4 md:-my-6 bg-white min-h-[calc(100dvh-111px)] md:h-[calc(100dvh-111px)] md:overflow-hidden overflow-y-auto p-4 sm:p-6 md:p-10 text-[#110F18] font-sans flex items-start md:items-center justify-center relative">
       <style>{`
         @keyframes scan {
           0% { transform: translateY(-100%); }
@@ -174,10 +174,10 @@ export const VisualizerPage: React.FC = () => {
       
 
       
-      <div className="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center py-4 md:py-0">
         
         {/* Stadium Viewport - Left Side */}
-        <div className="lg:col-span-7 bg-[#0A0712] rounded-xl p-6 md:p-10 relative flex items-center justify-center shadow-inner overflow-hidden min-h-[400px]">
+        <div className="lg:col-span-7 bg-[#0A0712] rounded-xl p-4 sm:p-6 md:p-10 relative flex items-center justify-center shadow-inner overflow-hidden min-h-[280px] sm:min-h-[360px] md:min-h-[400px]">
           <svg className="w-full max-w-[680px] h-auto drop-shadow-2xl" viewBox="0 0 160 100">
             {/* Pitch */}
             <rect x="60" y="36" width="40" height="28" rx="4" fill="#06040A" stroke="#625E75" strokeWidth="1.5" opacity="0.4" />

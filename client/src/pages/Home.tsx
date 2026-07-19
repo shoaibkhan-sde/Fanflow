@@ -301,16 +301,26 @@ export const Home: React.FC = () => {
           .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
           .hero-title { font-size: 32px; }
           .home-footer { padding-top: 36px; }
+          .home-main { padding: 40px 0 0; }
         }
         @media(max-width:600px) {
+          .wrap { padding: 0 16px; }
+          .hero-title { font-size: 26px; letter-spacing: -0.3px; }
+          .sub { font-size: 14px; margin-bottom: 28px; }
+          .home-main { padding: 28px 0 0; }
+          .role-card { padding: 20px; }
+          .roles { margin-bottom: 36px; gap: 12px; }
+          .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+          .services { grid-template-columns: 1fr; gap: 10px; }
+          .teaser-left { padding: 0; }
+          .teaser-right { display: none; }
           .footer-grid { grid-template-columns: 1fr; gap: 28px; padding-bottom: 24px; }
           .footer-col p { max-width: 100%; }
           .footer-col:first-child { padding-bottom: 4px; border-bottom: 1px solid var(--border); }
           .home-footer { padding-top: 28px; }
           .footer-bottom { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px 0; }
           .footer-bottom > div { width: 100%; justify-content: flex-start; }
-          .stats { grid-template-columns: 1fr 1fr; }
-          .services { grid-template-columns: 1fr; }
+          .stats-label { flex-direction: column; align-items: flex-start; gap: 6px; }
         }
       `}</style>
 
