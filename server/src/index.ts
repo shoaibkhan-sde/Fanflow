@@ -55,7 +55,7 @@ app.get('*', (req, res) => {
 });
 
 // Global error handler
-app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   const requestId = (req.headers['x-request-id'] as string) || 'unknown';
   logJSON('ERROR', {
     requestId,
@@ -84,7 +84,7 @@ async function bootstrap() {
         message: `Fanflow Backend running on port ${PORT}`
       });
     });
-  } catch (err: unknown) {
+  } catch (err: any) {
     logJSON('ERROR', {
       requestId: 'BOOT',
       method: 'SERVER',
