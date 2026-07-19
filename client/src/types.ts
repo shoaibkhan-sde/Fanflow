@@ -43,10 +43,10 @@ export interface CrowdZone {
 export interface Incident {
   incidentId: string;
   description: string;
-  reportedBy: 'volunteer' | 'staff';
+  reportedBy: 'volunteer' | 'staff' | 'system';
   zoneId: string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  category: 'security' | 'medical' | 'maintenance' | 'transit' | 'other';
+  category: 'security' | 'medical' | 'maintenance' | 'transit' | 'crowd' | 'other';
   summary: string;
   status: 'active' | 'resolved';
   createdAt: string;

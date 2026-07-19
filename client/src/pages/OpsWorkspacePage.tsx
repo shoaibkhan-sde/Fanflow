@@ -45,7 +45,7 @@ export const OpsWorkspacePage: React.FC = () => {
 
         // Dynamically generate incidents based on zone densities
         incData = zoneData.map((z) => {
-          let priority = 'LOW';
+          let priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
           let summary = 'Normal Operations';
           let description = `Crowd density is at ${z.density}%. Operations running smoothly.`;
           
