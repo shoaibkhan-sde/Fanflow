@@ -64,7 +64,7 @@ export const NavBar: React.FC<NavBarProps> = ({
               }`}
             >
               <Compass size={14} className={activePersona === 'fan' ? 'text-white' : ''} />
-              <span className="hidden xl:inline">Fan Concierge</span>
+              <span className="hidden xl:inline">Matchday Assistant</span>
             </button>
             
             <button
@@ -81,7 +81,7 @@ export const NavBar: React.FC<NavBarProps> = ({
               }`}
             >
               <Shield size={14} className={activePersona === 'ops' ? 'text-white' : ''} />
-              <span className="hidden xl:inline">Ops Workspace</span>
+              <span className="hidden xl:inline">Stadium Command</span>
             </button>
           </div>
 

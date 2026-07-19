@@ -47,9 +47,26 @@ export interface Incident {
   createdAt: Date;
 }
 
+export interface Facility {
+  facilityId: string;
+  name: string;
+  type: 'restroom' | 'concession' | 'merchandise';
+  zoneId: string;
+  waitTimeMinutes: number;
+  status: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
 export interface ChatSession {
   sessionId: string;
   messages: { role: 'user' | 'model'; text: string; timestamp: Date }[];
+}
+
+export interface User {
+  id: string;
+  email: string;
+  passwordHash?: string;
+  fullName: string;
+  isGuest?: boolean;
 }
 
 // In-memory fallback database
@@ -75,9 +92,21 @@ class InMemoryDb {
     ]
   };
 
+  facilities: Facility[] = [
+    { facilityId: 'F-1', name: 'North Concessions', type: 'concession', zoneId: 'Zone-A', waitTimeMinutes: 5, status: 'LOW' },
+    { facilityId: 'F-2', name: 'North Restrooms', type: 'restroom', zoneId: 'Zone-A', waitTimeMinutes: 2, status: 'LOW' },
+    { facilityId: 'F-3', name: 'East Food Court', type: 'concession', zoneId: 'Zone-B', waitTimeMinutes: 15, status: 'MEDIUM' },
+    { facilityId: 'F-4', name: 'East Restrooms', type: 'restroom', zoneId: 'Zone-B', waitTimeMinutes: 8, status: 'MEDIUM' },
+    { facilityId: 'F-5', name: 'South Grill', type: 'concession', zoneId: 'Zone-C', waitTimeMinutes: 25, status: 'HIGH' },
+    { facilityId: 'F-6', name: 'South Restrooms', type: 'restroom', zoneId: 'Zone-C', waitTimeMinutes: 4, status: 'LOW' },
+    { facilityId: 'F-7', name: 'West Snacks', type: 'concession', zoneId: 'Zone-D', waitTimeMinutes: 12, status: 'MEDIUM' },
+    { facilityId: 'F-8', name: 'West Restrooms', type: 'restroom', zoneId: 'Zone-D', waitTimeMinutes: 3, status: 'LOW' }
+  ];
+
   crowdZones: CrowdZone[] = [];
   incidents: Incident[] = [];
   chatSessions: ChatSession[] = [];
+  users: User[] = [];
 
   constructor() {
     // Populate crowd zones with initial simulated state
@@ -398,9 +427,32 @@ export async function getChatHistory(sessionId: string): Promise<{ role: 'user' 
     return session ? session.messages.map(m => ({ role: m.role, text: m.text })) : [];
   }
 
-  const session = await mongoDb.collection<any>('chatSessions').findOne({ sessionId });
   if (session && session.messages) {
     return session.messages.map((m: any) => ({ role: m.role, text: m.text }));
   }
   return [];
+}
+
+export async function getDbUserByEmail(email: string): Promise<User | null> {
+  if (isUsingFallback || !mongoDb) {
+    return memoryDb.users.find(u => u.email === email) || null;
+  }
+  const user = await mongoDb.collection('users').findOne({ email });
+  return user as unknown as User | null;
+}
+
+export async function createDbUser(user: Omit<User, 'id'>): Promise<User> {
+  const newUser = { ...user, id: `u-${Date.now()}` };
+  if (isUsingFallback || !mongoDb) {
+    memoryDb.users.push(newUser);
+    return newUser;
+  }
+  await mongoDb.collection('users').insertOne(newUser);
+  return newUser;
+}
+
+export async function getFacilities(): Promise<Facility[]> {
+  // If we had a MongoDB collection, we'd query it here. For now, always return the simulated memory array.
+  // Wait times can be jittered dynamically just like crowd zones if we added it to the simulator loop.
+  return memoryDb.facilities;
 }

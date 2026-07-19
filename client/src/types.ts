@@ -1,3 +1,12 @@
+export interface Facility {
+  facilityId: string;
+  name: string;
+  type: 'restroom' | 'concession' | 'merchandise';
+  zoneId: string;
+  waitTimeMinutes: number;
+  status: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
 export interface VenueGate {
   gateId: string;
   name: string;

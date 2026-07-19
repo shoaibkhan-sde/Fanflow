@@ -2,15 +2,17 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { logJSON } from './middleware';
 import { getVenueLayout, getCrowdDensities, getIncidents, CrowdZone, VenueGate, TransitHub, Incident } from './db';
 import { StadiumGraph, DensityMap } from './graph';
-// Initialize the Gemini API client if key is present
-const apiKey = process.env.GEMINI_API_KEY;
 let genAI: GoogleGenerativeAI | null = null;
 
-if (apiKey) {
-  genAI = new GoogleGenerativeAI(apiKey);
-  logJSON('INFO', { requestId: 'BOOT', method: 'GEMINI', url: 'init', message: 'Gemini API client initialized successfully.' });
-} else {
-  logJSON('WARN', { requestId: 'BOOT', method: 'GEMINI', url: 'init', message: 'GEMINI_API_KEY is not defined. Fanflow will use high-fidelity mock AI fallbacks.' });
+function getGenAI(): GoogleGenerativeAI | null {
+  if (genAI) return genAI;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    genAI = new GoogleGenerativeAI(apiKey);
+    logJSON('INFO', { requestId: 'RUNTIME', method: 'GEMINI', url: 'init', message: 'Gemini API client initialized successfully.' });
+    return genAI;
+  }
+  return null;
 }
 
 // Interfaces for structured AI outputs
@@ -39,12 +41,13 @@ export async function processChat(
   const incidents = await getIncidents().then(list => list.filter(i => i.status === 'active'));
 
   // If no Gemini Client, run mock fallback
-  if (!genAI) {
+  const ai = getGenAI();
+  if (!ai) {
     return generateMockChat(message, accessibilityMode, densities, incidents, requestId);
   }
 
   try {
-    const model = genAI.getGenerativeModel({
+    const model = ai.getGenerativeModel({
       model: 'gemini-1.5-flash',
       tools: [{
         functionDeclarations: [{
@@ -68,7 +71,7 @@ export async function processChat(
       }]
     });
 
-    const systemPrompt = `You are the Fanflow AI Concierge, a real-time, context-aware digital assistant for the FIFA World Cup 2026.
+    const systemPrompt = `You are the Fanflow Matchday Assistant, a real-time, context-aware digital assistant for the FIFA World Cup 2026.
 Your job is to provide navigation, accessibility, and transit assistance to fans.
 
 CURRENT VENUE LAYOUT CONTEXT:
@@ -168,12 +171,13 @@ export async function triageIncident(
   zoneId: string,
   requestId: string
 ): Promise<IncidentAIResponse> {
-  if (!genAI) {
+  const ai = getGenAI();
+  if (!ai) {
     return generateMockIncident(description, reportedBy, zoneId, requestId);
   }
 
   try {
-    const model = genAI.getGenerativeModel({
+    const model = ai.getGenerativeModel({
       model: 'gemini-1.5-flash',
       generationConfig: { responseMimeType: 'application/json' }
     });
@@ -254,7 +258,16 @@ function generateMockChat(
   // 2. Check for Accessibility Intent
   const hasAccessIntent = accessibilityMode || text.includes('wheelchair') || text.includes('silla') || text.includes('rampa') || text.includes('ramp') || text.includes('elevator') || text.includes('ascensor') || text.includes('disabled') || text.includes('incapacitado') || text.includes('handicap');
   
-  // 3. Crowd-Aware Routing logic with Graph Engine
+  // 3. Conversational Overrides (Mock enhancements)
+  if (text.match(/^(hi|hello|hey|how are you|who are you|what are you|tell me about yourself|good morning|good evening)/i)) {
+    return {
+      text: `${greeting} I am your Fanflow Matchday Assistant. I can help you navigate the stadium, find the least congested gates, identify zero-emission transit options, and locate accessible routes. How can I assist you today?`,
+      highlights: [],
+      detectedLanguage: lang
+    };
+  }
+
+  // 4. Crowd-Aware Routing logic with Graph Engine
   const sortedZones = [...densities].sort((a, b) => a.density - b.density);
   const worstZone = sortedZones[sortedZones.length - 1]; // Zone with highest crowd density
 

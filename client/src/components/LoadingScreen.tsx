@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, Component, ErrorInfo, ReactNode } from 'react';
+import React, { useState, useEffect, useCallback, Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Spline from '@splinetool/react-spline';
 
@@ -26,9 +27,9 @@ const FifaBallIcon = ({ className, progress = 0 }: { className?: string; progres
 
 // Same words as nynjfwc26.com, with #WEAREFANS replacing #WEARENYNJ
 const CYCLE_WORDS: { text: string; color: string }[] = [
-  { text: '#FIFAWORLDCUP', color: '#a7f3d0' }, // emerald-200
-  { text: '#WEARE26', color: '#a3e635' }, // lime-400
-  { text: '#WEAREFANS', color: '#a7f3d0' },
+  { text: '#FIFAWORLDCUP', color: '#2fbf9f' }, // Fanflow Teal
+  { text: '#WEARE26', color: '#f5a623' },      // Fanflow Amber
+  { text: '#WEAREFANS', color: '#7c5cff' },    // Fanflow Violet
 ];
 
 // Swiper config from nynjfwc26.com:
@@ -140,7 +141,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
       transition={{ duration: exiting ? 0.6 : 0, ease: 'easeInOut' }}
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center select-none overflow-hidden"
       style={{
-        background: 'radial-gradient(ellipse at center, #064e3b 0%, #022c22 100%)', // emerald-900 to emerald-950
+        background: 'radial-gradient(circle at 20% -20%, #3b2667 0%, transparent 50%), radial-gradient(circle at 80% 120%, #153c35 0%, transparent 50%), #0e0b1a',
       }}
       role="progressbar"
       aria-valuenow={progress}

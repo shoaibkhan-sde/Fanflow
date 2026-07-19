@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getVenueLayout, getCrowdDensities, getIncidents, logIncident, appendChatMessage, getChatHistory, updateZoneDensityDirectly } from './db';
+import { getVenueLayout, getCrowdDensities, getIncidents, logIncident, appendChatMessage, getChatHistory, updateZoneDensityDirectly, getFacilities } from './db';
 import { processChat, triageIncident } from './gemini';
 import { getRequestId, logJSON } from './middleware';
 
@@ -25,6 +25,18 @@ router.get('/crowd', async (req: Request, res: Response) => {
     return res.json(densities);
   } catch (err: any) {
     logJSON('ERROR', { requestId, method: 'GET', url: '/api/crowd', message: 'Failed fetching crowd densities.', error: err.message });
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// GET /api/facilities - Wait time data for restrooms and concessions
+router.get('/facilities', async (req: Request, res: Response) => {
+  const requestId = getRequestId(req);
+  try {
+    const facilities = await getFacilities();
+    return res.json(facilities);
+  } catch (err: any) {
+    logJSON('ERROR', { requestId, method: 'GET', url: '/api/facilities', message: 'Failed fetching facilities.', error: err.message });
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });

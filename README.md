@@ -42,15 +42,16 @@ Fanflow addresses the challenges of large-scale event navigation, transit coordi
 
 ### Fan Features
 - **Fan Concierge Chat**: A GenAI conversational assistant answering navigation, entry/exit, and transit queries. It auto-detects Spanish, French, and English, returning answers in the user's native tongue.
-- **Interactive SVG Map**: Vector-based blueprint highlighting gates, zones, or transit hubs when referenced in the concierge's AI response. Zones dynamically change colors (emerald, amber, rose) based on live density telemetry.
+- **Interactive SVG Map**: Vector-based blueprint highlighting gates, zones, or transit hubs when referenced in the concierge's AI response. Zones dynamically change colors (emerald, amber, rose) based on live density telemetry, and the active stand automatically highlights the least congested zone.
+- **Live Match Scoreboard & Celebrations**: Global synchronized scoreboard across all views that tracks live match progression, featuring rich UI pop-ups for goals and full-time celebrations complete with player cards and animations.
 - **Accessibility Integration**: Accessibility (ADA) Mode alters visual themes (larger text, high-contrast colors) and forces the routing engine to bypass stairs and turnstiles, directing users exclusively to ramps and elevators (Gate 1 and Gate 3).
 
 ### Ops / Organizer / Volunteer Features
-- **Crowd Management Dashboard**: Evaluates overall stadium occupancy, attendance, and triggers blinking visual alerts for high-density stands (>80% capacity).
+- **Dynamic Stadium Dashboard**: Evaluates overall stadium occupancy and average wait times in real-time. Automatically triggers critical Active Alerts if any stand exceeds 90% capacity.
+- **Alert Level Triage**: Staff can monitor and manually adjust Alert Levels (Low, Elevated, High, Critical) across different zones to proactively manage congestion.
 - **Sustainability Tracker Widget**: Computes dynamic carbon footprint savings in kilograms of CO2 and tracks public transit utilization metrics.
 - **Real-Time Incident Reporting**: Form for volunteers and staff to log issues. The description is processed by Gemini to automatically assign priority (LOW, MEDIUM, HIGH), categorize the issue, and create a one-sentence summary.
 - **Operational Intelligence Feed**: Stream of active incidents sorted by priority. HIGH priority tickets trigger automatic density spikes in the DB, feeding back into the Fan Concierge's routing prompts.
-- **Simulation Control Panel**: Interface to manually adjust zone density by +/-15% to test and verify real-time AI rerouting dynamics.
 
 ---
 
